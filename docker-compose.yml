@@ -13,6 +13,26 @@ services:
     image: mysql:latest
     environment:
       - MYSQL_DATABASE=db
-      - MYSQL_USER=value=db
-      - MYSQL_PASSWORD=value=password
+      - MYSQL_USER=localhost
+      - MYSQL_PASSWORD=12345
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
+    ports:
+      - "3307:3306"
+
+  pythonapp:
+    build: ./data/
+    depends_on:
+      - db
+    volumes:
+      - ./data:/app
+    command: ["python", "api.py"]
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      - PMA_HOST=db
+      - MYSQL_PASSWORD=12345
+    ports:
+      - "8081:80"
+    depends_on:
+      - db

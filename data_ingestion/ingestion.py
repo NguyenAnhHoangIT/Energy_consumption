@@ -1,11 +1,56 @@
 import requests
 import mysql.connector
 from mysql.connector import Error
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
+
+# Function to check if the table exists, and create it if not
+def check_and_create_table(db_connection):
+    try:
+        # Connect to MySQL
+        connection = db_connection
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            # Check if the table exists
+            cursor.execute("SHOW TABLES LIKE 'energy_data'")
+            result = cursor.fetchone()
+
+            if not result:
+                # Create the table if it doesn't exist
+                create_table_query = """
+                    CREATE TABLE energy_data (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        interval_start_utc DATETIME,
+                        interval_end_utc DATETIME,
+                        solar FLOAT,
+                        wind FLOAT,
+                        geothermal FLOAT,
+                        biomass FLOAT,
+                        biogas FLOAT,
+                        small_hydro FLOAT,
+                        coal FLOAT,
+                        nuclear FLOAT,
+                        natural_gas FLOAT,
+                        large_hydro FLOAT,
+                        batteries FLOAT,
+                        imports FLOAT,
+                        other FLOAT
+                    )
+                """
+                cursor.execute(create_table_query)
+                print("Table 'energy_data' created successfully.")
+
+    except Error as e:
+        print(f"Error: {e}")
+    finally:
+        if connection.is_connected():
+            cursor.close()
 
 # Function to fetch and insert data into the database
-def fetch_and_insert_data(last_fetched_time):
+def fetch_and_insert_data(last_fetched_time, db_connection):
+    # Check if table exists, create if not
+    check_and_create_table(db_connection)
+
     # Format the time in UTC as required by the API
     start_time = last_fetched_time.strftime('%Y-%m-%dT%H:%M:%SZ')
     current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -27,25 +72,20 @@ def fetch_and_insert_data(last_fetched_time):
     if data:
         try:
             # Connect to MySQL
-            connection = mysql.connector.connect(
-                host='localhost',
-                user='root',
-                password='12345',
-                database='db'
-            )
+            connection = db_connection
 
             if connection.is_connected():
                 cursor = connection.cursor()
 
                 # Prepare the INSERT statement
                 insert_query = """
-                                INSERT INTO energy_data (
-                                interval_start_utc, interval_end_utc, solar, wind, geothermal, biomass, biogas, 
-                                small_hydro, coal, nuclear, natural_gas, large_hydro, batteries, imports, other
-                                ) VALUES (
-                                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                                )
-                            """
+                    INSERT INTO energy_data (
+                        interval_start_utc, interval_end_utc, solar, wind, geothermal, biomass, biogas, 
+                        small_hydro, coal, nuclear, natural_gas, large_hydro, batteries, imports, other
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    )
+                """
 
                 # Insert each record
                 for record in data.get('data', []):
@@ -74,11 +114,3 @@ def fetch_and_insert_data(last_fetched_time):
                 print("MySQL connection closed.")
 
     return last_fetched_time
-
-# Main loop to fetch new data every 30 minutes
-last_fetched_time = datetime.utcnow() - timedelta(days=1)  # Start with 24 hours back
-
-while True:
-    last_fetched_time = fetch_and_insert_data(last_fetched_time)
-    print("Waiting for the next fetch...")
-    time.sleep(1800)  # Wait 30 minutes before the next fetch
