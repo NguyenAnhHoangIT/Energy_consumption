@@ -1,0 +1,67 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+nav {
+    background-color: #444;
+    width: 100%;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 1rem;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 1rem;
+    display: block;
+}
+
+nav ul li a:hover {
+    background-color: #555;
+}
+
+main {
+    padding: 2rem;
+    width: 80%;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 2rem 0;
+}
+
+section {
+    margin-bottom: 2rem;
+}
+
+.chart-container {
+    margin-bottom: 2rem;
+    height: 400px; /* Set a fixed height for each chart container */
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    width: 100%;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+}
