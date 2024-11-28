@@ -1,43 +1,40 @@
 import requests
 import mysql.connector
 from mysql.connector import Error
+from datetime import datetime, timedelta, timezone
 import time
-from datetime import datetime, timedelta
 
-# Function to fetch and insert data into the database
 def fetch_and_insert_data(last_fetched_time):
-    # Format the time in UTC as required by the API
     start_time = last_fetched_time.strftime('%Y-%m-%dT%H:%M:%SZ')
-    current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    current_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
     # API URL with time filters
-    api_url = f"https://api.gridstatus.io/v1/datasets/caiso_fuel_mix/query?api_key=734c5f6f8951487d90de7ef8ccb75832&start_time={start_time}&end_time={current_time}"
+    api_url = f"https://api.gridstatus.io/v1/datasets/caiso_fuel_mix/query?api_key=0287b26403464cf3921101a5c07e97b4&start_time={start_time}&end_time={current_time}"
 
     print(f"Fetching data from {start_time} to {current_time}...")
 
     response = requests.get(api_url)
 
-    # Check if the API request was successful
     if response.status_code == 200:
-        data = response.json()  # assuming the data is returned in JSON format
+        data = response.json()  
     else:
         print(f"Failed to fetch data from API. Status code: {response.status_code}")
         return last_fetched_time
 
     if data:
+        connection = None  
+
         try:
-            # Connect to MySQL
             connection = mysql.connector.connect(
                 host='localhost',
                 user='root',
-                password='12345',
+                password='0915146847',
                 database='db'
             )
 
             if connection.is_connected():
                 cursor = connection.cursor()
 
-                # Prepare the INSERT statement
                 insert_query = """
                                 INSERT INTO energy_data (
                                 interval_start_utc, interval_end_utc, solar, wind, geothermal, biomass, biogas, 
@@ -57,28 +54,21 @@ def fetch_and_insert_data(last_fetched_time):
                     )
                     cursor.execute(insert_query, values)
 
-                # Commit the transaction
                 connection.commit()
 
                 print(f"{cursor.rowcount} records inserted successfully.")
 
-                # Update the last fetched time to the current time
-                last_fetched_time = datetime.utcnow()
+                last_fetched_time = datetime.now(timezone.utc)
 
         except Error as e:
             print(f"Error: {e}")
         finally:
-            if connection.is_connected():
+            if connection and connection.is_connected():
                 cursor.close()
                 connection.close()
                 print("MySQL connection closed.")
+    time.sleep(300)
 
-    return last_fetched_time
-
-# Main loop to fetch new data every 30 minutes
-last_fetched_time = datetime.utcnow() - timedelta(days=1)  # Start with 24 hours back
-
-while True:
-    last_fetched_time = fetch_and_insert_data(last_fetched_time)
-    print("Waiting for the next fetch...")
-    time.sleep(1800)  # Wait 30 minutes before the next fetch
+last_fetched_time = datetime.now(timezone.utc) - timedelta(days=1)
+fetch_and_insert_data(last_fetched_time)
+print("Fetching data completed.")
