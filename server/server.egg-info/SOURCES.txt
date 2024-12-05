@@ -1,0 +1,11 @@
+setup.py
+data_ingestion/__init__.py
+data_ingestion/ingestion.py
+database_api/__init__.py
+database_api/api.py
+database_api/app.py
+database_api/main.py
+server.egg-info/PKG-INFO
+server.egg-info/SOURCES.txt
+server.egg-info/dependency_links.txt
+server.egg-info/top_level.txt

@@ -9,7 +9,7 @@ CORS(app)  # Cho phép Frontend kết nối đến API
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': '0915146847',
+    'password': '12345',
     'database': 'db'
 }
 
@@ -34,5 +34,3 @@ def get_energy_data():
 
     return jsonify(rows)
 
-if __name__ == '__main__':
-    app.run(port=8000, debug=True)
