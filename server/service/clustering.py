@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import time
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
@@ -48,3 +49,21 @@ def clusteringData(col_name):
     cleaned_data['customized_kmeans_labels'] = cleaned_data[['kmeans_label', 'half_year']].apply(lambda x: customize_k_means_label(x['kmeans_label'], x['half_year']), axis=1)
     plt.figure(figsize=(20,5))
     plt.scatter(cleaned_data['date_time'], cleaned_data['solar'], c=cleaned_data['customized_kmeans_labels'])
+
+def runclustering():
+    while True:
+        clusteringData('solar')
+        clusteringData('wind')
+        clusteringData('geothermal')
+        clusteringData('biomass')
+        clusteringData('biogas')
+        clusteringData('small_hydro')
+        clusteringData('coal')
+        clusteringData('nuclear')
+        clusteringData('natural_gas')
+        clusteringData('large_hydro')
+        clusteringData('batteries')
+        clusteringData('imports')
+        time.sleep(300)
+
+runclustering()
