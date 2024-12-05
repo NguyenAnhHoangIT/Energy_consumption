@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
+import json
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
@@ -47,23 +48,29 @@ def clusteringData(col_name):
     cleaned_data['kmeans_label'] = kmeans.labels_
     cleaned_data['customized_kmeans_labels'] = cleaned_data['kmeans_label']
     cleaned_data['customized_kmeans_labels'] = cleaned_data[['kmeans_label', 'half_year']].apply(lambda x: customize_k_means_label(x['kmeans_label'], x['half_year']), axis=1)
-    plt.figure(figsize=(20,5))
-    plt.scatter(cleaned_data['date_time'], cleaned_data['solar'], c=cleaned_data['customized_kmeans_labels'])
+    # Prepare JSON response instead of plotting
+    json_data = cleaned_data.reset_index()[['date_time', col_name, 'customized_kmeans_labels']].to_json(orient='records', date_format='iso')
+    return json_data
 
 def runclustering():
+    result = {}
+
     while True:
-        clusteringData('solar')
-        clusteringData('wind')
-        clusteringData('geothermal')
-        clusteringData('biomass')
-        clusteringData('biogas')
-        clusteringData('small_hydro')
-        clusteringData('coal')
-        clusteringData('nuclear')
-        clusteringData('natural_gas')
-        clusteringData('large_hydro')
-        clusteringData('batteries')
-        clusteringData('imports')
+        result['solar'] = clusteringData('solar')
+        result['wind'] = clusteringData('wind')
+        result['geothermal'] = clusteringData('geothermal')
+        result['biomass'] = clusteringData('biomass')
+        result['biogas'] = clusteringData('biogas')
+        result['small_hydro'] = clusteringData('small_hydro')
+        result['coal'] = clusteringData('coal')
+        result['nuclear'] = clusteringData('nuclear')
+        result['natural_gas'] = clusteringData('natural_gas')
+        result['large_hydro'] = clusteringData('large_hydro')
+        result['batteries'] = clusteringData('batteries')
+        result['imports'] = clusteringData('imports')
+
+        #save the result in JSON format
+        data = json.dumps(result, indent=2)
         time.sleep(300)
 
 runclustering()

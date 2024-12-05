@@ -28,19 +28,8 @@ def daily():
     # Filter for the last 7 days
     last_7_days = df[df['date'] >= pd.Timestamp.today() - pd.Timedelta(days=7)]
 
-    # Plot all energy sources
-    plt.figure(figsize=(12, 8))
-    for column in last_7_days.columns:
-        if column != 'date':  # Skip the 'date' column
-            plt.plot(last_7_days['date'], last_7_days[column], label=column)
-
-    plt.title('Daily Energy Generation (Last 7 Days)')
-    plt.xlabel('Date')
-    plt.ylabel('Energy (MW)')
-    plt.xticks(rotation=45)
-    # Move the legend to the right
-    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1))
-    plt.tight_layout()
+    # Return data as a JSON
+    return last_7_days.reset_index().to_json(orient='records', date_format='iso')
 
 def monthly():
     df = analyzeData()  # Analyze or load data
@@ -55,17 +44,8 @@ def monthly():
     # Resample by month-end ('ME') and calculate the median
     monthly_data = this_year.resample('ME').median()
 
-    # Plot all energy sources
-    plt.figure(figsize=(12, 8))
-    for column in monthly_data.columns:
-        plt.plot(monthly_data.index, monthly_data[column], label=column)
-
-    plt.title('Monthly Energy Generation (This Year)')
-    plt.xlabel('Month')
-    plt.ylabel('Energy (MW)')
-    plt.xticks(rotation=45)
-    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1))  # Legend on the right
-    plt.tight_layout()
+    # Return data as a JSON
+    return monthly_data.reset_index().to_json(orient='records', date_format='iso')
 
 def yearly():
     df = analyzeData()  # Analyze or load data
@@ -80,23 +60,14 @@ def yearly():
     # Resample by year-end ('A') and calculate the sum
     yearly_data = five_years_data.resample('A').sum()
 
-    # Plot all energy sources
-    plt.figure(figsize=(12, 8))
-    for column in yearly_data.columns:
-        plt.plot(yearly_data.index.year, yearly_data[column], label=column)
-
-    plt.title('Yearly Energy Generation (Last 5 Years)')
-    plt.xlabel('Year')
-    plt.ylabel('Energy (MW)')
-    plt.xticks(yearly_data.index.year)  # Show year labels on the x-axis
-    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1))  # Legend on the right
-    plt.tight_layout()
+    # Return data as a JSON
+    return yearly_data.reset_index().to_json(orient='records', date_format='iso')
 
 def runphantich():
     while True:
-        daily()
-        monthly()
-        yearly()
+        daily_data = daily()  # Get daily data
+        monthly_data = monthly()  # Get monthly data
+        yearly_data = yearly()  # Get yearly data
         time.sleep(300)
 
 runphantich()
